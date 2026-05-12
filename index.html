@@ -13,7 +13,7 @@
     line-height: 1.5;
     max-width: 1280px;
     margin: 40px auto;
-    padding: 0 24px 120px 24px;
+    padding: 0 24px 60px 24px;
   }
   h1 { font-size: 26px; margin: 0 0 4px 0; color: #111; }
   .date { color: #777; font-size: 14px; margin-bottom: 24px; }
@@ -104,16 +104,51 @@
   }
   [contenteditable="true"]:hover { background: #fff8d6; }
   [contenteditable="true"]:focus { background: #fffbe6; box-shadow: inset 0 0 0 2px #f5c518; }
-
-  body.mode-ro [contenteditable="true"]:hover,
-  body.mode-ro [contenteditable="true"]:focus {
-    background: #fffbe6;
-    box-shadow: inset 0 0 0 2px #f5c518;
-  }
   body.mode-ro td[data-col="comment"]:hover { background: #fffbe6 !important; }
   body.mode-ro td[data-col="comment"]:focus { background: #fffbe6 !important; box-shadow: inset 0 0 0 2px #f5c518; }
 
-  /* Toolbar (top) — only in edit mode */
+  .flash {
+    animation: flash 1.5s ease-out;
+  }
+  @keyframes flash {
+    0%   { background: #fde68a !important; }
+    100% { background: transparent; }
+  }
+
+  /* Sync indicator (top-left) */
+  .sync-indicator {
+    position: fixed;
+    top: 16px;
+    left: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-size: 13px;
+    color: #555;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    z-index: 1000;
+    font-family: inherit;
+  }
+  .sync-indicator .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #9ca3af;
+    transition: background 0.2s;
+  }
+  .sync-indicator.sync-ok .dot { background: #16a34a; }
+  .sync-indicator.sync-saving .dot { background: #f59e0b; animation: pulse 1s infinite; }
+  .sync-indicator.sync-error .dot { background: #c0392b; }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.4; }
+  }
+
+  /* Toolbar (top-right) — only in RW mode */
   .toolbar {
     position: fixed;
     top: 16px;
@@ -123,7 +158,6 @@
     z-index: 1000;
   }
   body.mode-ro .toolbar { display: none; }
-
   .toolbar button {
     background: #111;
     color: #fff;
@@ -141,45 +175,10 @@
   .toolbar button:active { transform: scale(0.97); }
   .toolbar button.secondary { background: #555; }
 
-  /* Bottom save bar — only in RO mode */
-  .savebar {
-    position: fixed;
-    bottom: 0; left: 0; right: 0;
-    background: #fff;
-    border-top: 1px solid #e5e7eb;
-    padding: 14px 24px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 16px;
-    box-shadow: 0 -4px 16px rgba(0,0,0,0.06);
-    z-index: 1000;
-  }
-  body:not(.mode-ro) .savebar { display: none; }
-  .savebar button {
-    background: #16a34a;
-    color: #fff;
-    border: none;
-    padding: 12px 28px;
-    font-size: 15px;
-    font-weight: 600;
-    border-radius: 8px;
-    cursor: pointer;
-    font-family: inherit;
-    transition: background 0.15s, transform 0.1s;
-  }
-  .savebar button:hover { background: #15803d; }
-  .savebar button:active { transform: scale(0.97); }
-  .savebar .hint {
-    color: #777;
-    font-size: 13px;
-  }
-
   .toast {
     position: fixed;
-    top: 16px;
-    left: 50%;
-    transform: translateX(-50%);
+    top: 60px;
+    right: 16px;
     background: #16a34a;
     color: #fff;
     padding: 10px 18px;
@@ -249,7 +248,7 @@
   }
 
   @media print {
-    .toolbar, .savebar { display: none; }
+    .toolbar, .sync-indicator { display: none; }
     [contenteditable="true"]:hover, [contenteditable="true"]:focus {
       background: transparent; box-shadow: none;
     }
@@ -266,9 +265,14 @@
   </div>
 </div>
 
+<div class="sync-indicator" id="sync-indicator">
+  <span class="dot"></span>
+  <span id="sync-text">Подключение…</span>
+</div>
+
 <div class="toolbar">
-  <button onclick="exportJSON()">Экспорт изменений (JSON)</button>
-  <button class="secondary" onclick="copyJSON()">Копировать JSON</button>
+  <button id="btn-export">Экспорт изменений (JSON)</button>
+  <button id="btn-copy" class="secondary">Копировать JSON</button>
 </div>
 
 <div id="toast" class="toast"></div>
@@ -277,7 +281,7 @@
 <div class="date" contenteditable="true" data-field="date">Дата: 2026-05-12</div>
 
 <div class="greeting">
-  <strong>Привет, Шеф.</strong> Эта статус-таблица сделана для тебя. Оставляй комменты в последнем столбике, нажимай «Сохранить» внизу.
+  <strong>Привет, Шеф.</strong> Эта статус-таблица сделана для тебя. Оставляй комменты в последнем столбике — они сохраняются автоматически, я сразу увижу их у себя.
 </div>
 
 <h2 contenteditable="true" data-section="1">1. EW</h2>
@@ -476,24 +480,41 @@
   </tbody>
 </table>
 
-<div class="savebar">
-  <span class="hint">Когда закончишь — нажми «Сохранить», файл скачается. Пришли его Аскару.</span>
-  <button onclick="saveComments()">Сохранить</button>
-</div>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
+import {
+  getFirestore, collection, doc, setDoc, onSnapshot, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
 
-<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyCnu4SJFgnXxAmUs-T5Ryn9e7EnLVluiZc",
+  authDomain: "statusboard-674f4.firebaseapp.com",
+  projectId: "statusboard-674f4",
+  storageBucket: "statusboard-674f4.firebasestorage.app",
+  messagingSenderId: "494795224544",
+  appId: "1:494795224544:web:761e4d4b2862fadd0f6785"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
 // ===== Mode detection =====
 const IS_PUBLIC = location.hostname.includes('github.io');
-if (IS_PUBLIC) document.body.classList.add('mode-ro');
-
-// ===== Read-only enforcement =====
-function applyReadOnly() {
-  if (!IS_PUBLIC) return;
+if (IS_PUBLIC) {
+  document.body.classList.add('mode-ro');
   document.querySelectorAll('[contenteditable="true"]').forEach(el => {
     if (el.dataset.col !== 'comment') el.removeAttribute('contenteditable');
   });
 }
-applyReadOnly();
+
+// ===== Sync indicator =====
+const syncEl = document.getElementById('sync-indicator');
+const syncText = document.getElementById('sync-text');
+function setSync(state, text) {
+  syncEl.classList.remove('sync-ok', 'sync-saving', 'sync-error');
+  if (state) syncEl.classList.add('sync-' + state);
+  syncText.textContent = text;
+}
 
 // ===== Pin lock =====
 (function() {
@@ -504,20 +525,16 @@ applyReadOnly();
 
   if (sessionStorage.getItem('sd_unlocked') === '1') {
     overlay.style.display = 'none';
-    loadCommentsFromStorage();
     return;
   }
-
   document.body.style.overflow = 'hidden';
   setTimeout(() => input.focus(), 50);
-
   input.addEventListener('input', () => {
     if (input.value.length === 4) {
       if (input.value === PIN) {
         sessionStorage.setItem('sd_unlocked', '1');
         overlay.style.display = 'none';
         document.body.style.overflow = '';
-        loadCommentsFromStorage();
       } else {
         error.textContent = 'Неверный код';
         input.value = '';
@@ -530,40 +547,67 @@ applyReadOnly();
   });
 })();
 
-// ===== Comments autosave (localStorage) =====
-const COMMENT_KEY = 'sd_comments_v1';
+// ===== Firestore: real-time comments =====
+function flashCell(el) {
+  el.classList.add('flash');
+  setTimeout(() => el.classList.remove('flash'), 1500);
+}
 
-function loadCommentsFromStorage() {
-  try {
-    const raw = localStorage.getItem(COMMENT_KEY);
-    if (!raw) return;
-    const data = JSON.parse(raw);
-    Object.entries(data).forEach(([rowId, text]) => {
+let firstSnap = true;
+setSync('saving', 'Подключение…');
+onSnapshot(
+  collection(db, 'comments'),
+  (snap) => {
+    snap.docChanges().forEach(change => {
+      const rowId = change.doc.id;
+      const data = change.doc.data();
       const cell = document.querySelector(`tr[data-row="${rowId}"] [data-col="comment"]`);
-      if (cell) cell.innerText = text;
+      if (!cell) return;
+      if (document.activeElement === cell) return;
+      const newText = (data.text || '').trim();
+      const cur = (cell.innerText || '').trim();
+      if (cur === newText) return;
+      if (newText) cell.innerText = newText;
+      else cell.textContent = '';
+      if (!firstSnap) flashCell(cell);
     });
-  } catch (e) { /* ignore */ }
-}
-
-let saveTimer = null;
-function saveCommentsToStorage() {
-  const data = {};
-  document.querySelectorAll('tr[data-row]').forEach(tr => {
-    const cell = tr.querySelector('[data-col="comment"]');
-    const text = (cell?.innerText || '').trim();
-    if (text) data[tr.dataset.row] = text;
-  });
-  localStorage.setItem(COMMENT_KEY, JSON.stringify(data));
-}
-
-document.addEventListener('input', (e) => {
-  if (e.target.dataset && e.target.dataset.col === 'comment') {
-    clearTimeout(saveTimer);
-    saveTimer = setTimeout(saveCommentsToStorage, 300);
+    firstSnap = false;
+    setSync('ok', 'Подключено');
+  },
+  (err) => {
+    console.error('Firestore subscribe error:', err);
+    setSync('error', 'Ошибка подключения');
   }
+);
+
+// ===== Save on input (debounced) =====
+const saveTimers = {};
+const AUTHOR = IS_PUBLIC ? 'shef' : 'askar';
+document.addEventListener('input', (e) => {
+  const t = e.target;
+  if (!t.dataset || t.dataset.col !== 'comment') return;
+  const tr = t.closest('tr[data-row]');
+  if (!tr) return;
+  const rowId = tr.dataset.row;
+  const text = (t.innerText || '').trim();
+  clearTimeout(saveTimers[rowId]);
+  setSync('saving', 'Сохранение…');
+  saveTimers[rowId] = setTimeout(async () => {
+    try {
+      await setDoc(doc(db, 'comments', rowId), {
+        text: text,
+        author: AUTHOR,
+        updated_at: serverTimestamp()
+      }, { merge: true });
+      setSync('ok', 'Сохранено');
+    } catch (err) {
+      console.error('Save error:', err);
+      setSync('error', 'Ошибка сохранения');
+    }
+  }, 500);
 });
 
-// ===== Snapshot =====
+// ===== JSON snapshot (RW only) =====
 function buildSnapshot() {
   const snap = {
     exported_at: new Date().toISOString(),
@@ -571,7 +615,6 @@ function buildSnapshot() {
     date: document.querySelector('[data-field="date"]').innerText.trim(),
     sections: []
   };
-
   document.querySelectorAll('h2[data-section]').forEach(h2 => {
     const section = { id: h2.dataset.section, title: h2.innerText.trim(), subsections: [], rows: [] };
     let node = h2.nextElementSibling;
@@ -601,16 +644,6 @@ function buildSnapshot() {
   return snap;
 }
 
-function buildCommentsOnlySnapshot() {
-  const out = { exported_at: new Date().toISOString(), comments: [] };
-  document.querySelectorAll('tr[data-row]').forEach(tr => {
-    const cell = tr.querySelector('[data-col="comment"]');
-    const text = (cell?.innerText || '').trim();
-    if (text) out.comments.push({ row_id: tr.dataset.row, comment: text });
-  });
-  return out;
-}
-
 function showToast(text, ok = true) {
   const t = document.getElementById('toast');
   t.textContent = text;
@@ -619,26 +652,22 @@ function showToast(text, ok = true) {
   setTimeout(() => t.classList.remove('show'), 1800);
 }
 
-function downloadJSON(obj, prefix) {
-  const json = JSON.stringify(obj, null, 2);
+document.getElementById('btn-export')?.addEventListener('click', () => {
+  const json = JSON.stringify(buildSnapshot(), null, 2);
   const blob = new Blob([json], { type: 'application/json;charset=utf-8' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   const stamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
   a.href = url;
-  a.download = `${prefix}_${stamp}.json`;
+  a.download = `status_snapshot_${stamp}.json`;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
-}
-
-function exportJSON() {
-  downloadJSON(buildSnapshot(), 'status_snapshot');
   showToast('JSON скачан');
-}
+});
 
-async function copyJSON() {
+document.getElementById('btn-copy')?.addEventListener('click', async () => {
   const json = JSON.stringify(buildSnapshot(), null, 2);
   try {
     await navigator.clipboard.writeText(json);
@@ -646,18 +675,7 @@ async function copyJSON() {
   } catch (e) {
     showToast('Не удалось скопировать', false);
   }
-}
-
-function saveComments() {
-  saveCommentsToStorage();
-  const snap = buildCommentsOnlySnapshot();
-  if (snap.comments.length === 0) {
-    showToast('Нет комментариев для сохранения', false);
-    return;
-  }
-  downloadJSON(snap, 'comments');
-  showToast('Комментарии сохранены');
-}
+});
 </script>
 
 </body>
