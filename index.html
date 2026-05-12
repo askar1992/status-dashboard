@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Статус-отчёт</title>
+<style>
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+    color: #222;
+    background: #fff;
+    line-height: 1.5;
+    max-width: 1200px;
+    margin: 40px auto;
+    padding: 0 24px 80px 24px;
+  }
+  h1 { font-size: 26px; margin: 0 0 4px 0; color: #111; }
+  .date { color: #777; font-size: 14px; margin-bottom: 28px; }
+  h2 {
+    font-size: 19px;
+    margin: 32px 0 8px 0;
+    padding-bottom: 6px;
+    border-bottom: 2px solid #222;
+    color: #111;
+  }
+  h3 { font-size: 15px; margin: 18px 0 6px 0; color: #444; font-weight: 600; }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 6px 0 14px 0;
+    font-size: 14px;
+  }
+  th, td {
+    border: 1px solid #d0d0d0;
+    padding: 9px 12px;
+    vertical-align: top;
+    text-align: left;
+  }
+  th { background: #f4f4f4; font-weight: 600; color: #222; }
+  tr:nth-child(even) td { background: #fafafa; }
+  td.num {
+    width: 56px;
+    color: #777;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+  td.task { width: 18%; font-weight: 500; }
+  td.ball-cell { width: 110px; text-align: center; }
+  td.next { width: 26%; }
+
+  .ball {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+    color: #fff;
+  }
+  .ball-us  { background: #c0392b; }
+  .ball-ext { background: #2563eb; }
+  .ball + .ball { margin-left: 4px; }
+
+  .hot {
+    display: inline-block;
+    background: #c0392b;
+    color: #fff;
+    padding: 1px 7px;
+    border-radius: 3px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    margin-right: 4px;
+  }
+  .note { color: #888; font-style: italic; font-size: 13px; }
+
+  [contenteditable="true"] {
+    outline: none;
+    transition: background 0.15s, box-shadow 0.15s;
+    border-radius: 3px;
+  }
+  [contenteditable="true"]:hover { background: #fff8d6; }
+  [contenteditable="true"]:focus { background: #fffbe6; box-shadow: inset 0 0 0 2px #f5c518; }
+
+  .toolbar {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    display: flex;
+    gap: 8px;
+    z-index: 1000;
+  }
+  .toolbar button {
+    background: #111;
+    color: #fff;
+    border: none;
+    padding: 10px 16px;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 6px;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    transition: transform 0.1s, background 0.15s;
+    font-family: inherit;
+  }
+  .toolbar button:hover { background: #2563eb; }
+  .toolbar button:active { transform: scale(0.97); }
+  .toolbar button.secondary { background: #555; }
+  .toolbar .toast {
+    position: absolute;
+    top: 48px;
+    right: 0;
+    background: #16a34a;
+    color: #fff;
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+    white-space: nowrap;
+  }
+  .toolbar .toast.show { opacity: 1; }
+
+  /* Pin overlay */
+  .pin-overlay {
+    position: fixed;
+    inset: 0;
+    background: #0f172a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 99999;
+  }
+  .pin-box {
+    background: #1e293b;
+    border-radius: 12px;
+    padding: 32px 40px;
+    text-align: center;
+    color: #f1f5f9;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+  }
+  .pin-box h2 {
+    margin: 0 0 20px 0;
+    font-size: 18px;
+    font-weight: 500;
+    color: #e2e8f0;
+    border: 0;
+    padding: 0;
+  }
+  .pin-box input {
+    width: 220px;
+    font-size: 28px;
+    text-align: center;
+    letter-spacing: 14px;
+    padding: 12px;
+    border: 2px solid #475569;
+    border-radius: 8px;
+    background: #0f172a;
+    color: #f1f5f9;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .pin-box input:focus { border-color: #3b82f6; }
+  .pin-error {
+    color: #f87171;
+    font-size: 13px;
+    margin-top: 12px;
+    min-height: 18px;
+  }
+  .shake { animation: shake 0.4s; }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-6px); }
+    40%, 80% { transform: translateX(6px); }
+  }
+
+  @media print {
+    .toolbar { display: none; }
+    [contenteditable="true"]:hover, [contenteditable="true"]:focus {
+      background: transparent; box-shadow: none;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div id="pin-overlay" class="pin-overlay">
+  <div class="pin-box">
+    <h2>Введите код доступа</h2>
+    <input id="pin-input" type="password" inputmode="numeric" maxlength="4" autocomplete="off" autofocus />
+    <div id="pin-error" class="pin-error"></div>
+  </div>
+</div>
+
+<div class="toolbar">
+  <button onclick="exportJSON()">Экспорт изменений (JSON)</button>
+  <button class="secondary" onclick="copyJSON()">Копировать JSON</button>
+  <div id="toast" class="toast"></div>
+</div>
+
+<h1 contenteditable="true" data-field="title">Статус-отчёт по текущим задачам</h1>
+<div class="date" contenteditable="true" data-field="date">Дата: 2026-05-08</div>
+
+<h2 contenteditable="true" data-section="1">1. EW</h2>
+<table data-section-id="1">
+  <thead>
+    <tr><th>#</th><th>Задача</th><th>Статус</th><th>Мяч на стороне</th><th>Следующее действие</th></tr>
+  </thead>
+  <tbody>
+    <tr data-row="1.1">
+      <td class="num" contenteditable="true" data-col="id">1.1</td>
+      <td class="task" contenteditable="true" data-col="task">Дополнительное соглашение к Договору займа</td>
+      <td contenteditable="true" data-col="status">ТСН согласился с предложенными условиями возврата в рассрочку без процентов.</td>
+      <td class="ball-cell" contenteditable="true" data-col="ball"><span class="ball ball-us">Нас</span></td>
+      <td class="next" contenteditable="true" data-col="next">Составить проект соглашения и передать на подписание.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 contenteditable="true" data-section="2">2. Земельный банк</h2>
+
+<h3 contenteditable="true" data-subsection="2.1">2.1. Участок 18 га</h3>
+<table data-section-id="2.1">
+  <thead>
+    <tr><th>#</th><th>Задача</th><th>Статус</th><th>Мяч на стороне</th><th>Следующее действие</th></tr>
+  </thead>
+  <tbody>
+    <tr data-row="2.1.1">
+      <td class="num" contenteditable="true" data-col="id">2.1.1</td>
+      <td class="task" contenteditable="true" data-col="task">Юристы</td>
+      <td contenteditable="true" data-col="status">Провели беседу с двумя юридическими конторами. Ни одни, ни другие не подошли.</td>
+      <td class="ball-cell" contenteditable="true" data-col="ball"><span class="ball ball-us">Нас</span></td>
+      <td class="next" contenteditable="true" data-col="next">Поиск других юристов.</td>
+    </tr>
+    <tr data-row="2.1.2">
+      <td class="num" contenteditable="true" data-col="id">2.1.2</td>
+      <td class="task" contenteditable="true" data-col="task">Топосъёмка</td>
+      <td contenteditable="true" data-col="status">Повторный выезд проведён. Получены кадастры, куда уходят линии электропередачи: 20317005024, 20317005033, 20317005128.</td>
+      <td class="ball-cell" contenteditable="true" data-col="ball"><span class="ball ball-us">Нас</span></td>
+      <td class="next" contenteditable="true" data-col="next">1. Передача кадастров юристам в отработку. 2. Дополнительные изыскания по трубопроводам и закопанным кабелям (Казахтелеком).</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 contenteditable="true" data-subsection="2.2">2.2. Участок 10 га (Табаган)</h3>
+<table data-section-id="2.2">
+  <thead>
+    <tr><th>#</th><th>Задача</th><th>Статус</th><th>Мяч на стороне</th><th>Следующее действие</th></tr>
+  </thead>
+  <tbody>
+    <tr data-row="2.2.1">
+      <td class="num" contenteditable="true" data-col="id">2.2.1</td>
+      <td class="task" contenteditable="true" data-col="task">Риелторы</td>
+      <td contenteditable="true" data-col="status">Выезды проведены, устные договорённости есть. ОС от покупателей нет.</td>
+      <td class="ball-cell" contenteditable="true" data-col="ball"><span class="ball ball-ext">Риелторы</span></td>
+      <td class="next" contenteditable="true" data-col="next">Ожидаем.</td>
+    </tr>
+    <tr data-row="2.2.2">
+      <td class="num" contenteditable="true" data-col="id">2.2.2</td>
+      <td class="task" contenteditable="true" data-col="task">Аэросъёмка</td>
+      <td contenteditable="true" data-col="status">1-й вариант видео получен.</td>
+      <td class="ball-cell" contenteditable="true" data-col="ball"><span class="ball ball-ext">Дронщик</span></td>
+      <td class="next" contenteditable="true" data-col="next">Ждём 2-й вариант по новым контурам, но парень странный и на связь выходит неохотно. Либо доплатить ему, чтобы по-новой отрисовал, либо найдём команду посерьёзнее.</td>
+    </tr>
+    <tr data-row="2.2.3">
+      <td class="num" contenteditable="true" data-col="id">2.2.3</td>
+      <td class="task" contenteditable="true" data-col="task">Партнёры</td>
+      <td contenteditable="true" data-col="status">Встречи: «Дом Мечты» (фахверк). Других не было.</td>
+      <td class="ball-cell" contenteditable="true" data-col="ball"><span class="ball ball-us">Нас</span></td>
+      <td class="next" contenteditable="true" data-col="next">Продолжаем поиск, выбираем с кем дальше.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 contenteditable="true" data-subsection="2.3">2.3. Участки под ЛЭПами</h3>
+<table data-section-id="2.3">
+  <thead>
+    <tr><th>#</th><th>Задача</th><th>Статус</th><th>Мяч на стороне</th><th>Следующее действие</th></tr>
+  </thead>
+  <tbody>
+    <tr data-row="2.3.1">
+      <td class="num" contenteditable="true" data-col="id">2.3.1</td>
+      <td class="task" contenteditable="true" data-col="task">Встреча с Айвазом</td>
+      <td contenteditable="true" data-col="status">Ожидаем встречу.</td>
+      <td class="ball-cell" contenteditable="true" data-col="ball"><span class="ball ball-ext">Мамед</span></td>
+      <td class="next" contenteditable="true" data-col="next">Назначить и провести.</td>
+    </tr>
+    <tr data-row="2.3.2">
+      <td class="num" contenteditable="true" data-col="id">2.3.2</td>
+      <td class="task" contenteditable="true" data-col="task">Предложение для Керемета</td>
+      <td contenteditable="true" data-col="status">В подготовке.</td>
+      <td class="ball-cell" contenteditable="true" data-col="ball"><span class="ball ball-us">Нас</span></td>
+      <td class="next" contenteditable="true" data-col="next">Завершить и направить Керемету.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 contenteditable="true" data-section="3">3. AGROSTAN</h2>
+<table data-section-id="3">
+  <thead>
+    <tr><th>#</th><th>Задача</th><th>Статус</th><th>Мяч на стороне</th><th>Следующее действие</th></tr>
+  </thead>
+  <tbody>
+    <tr data-row="3.1">
+      <td class="num" contenteditable="true" data-col="id">3.1</td>
+      <td class="task" contenteditable="true" data-col="task">Информирование Женисбека</td>
+      <td contenteditable="true" data-col="status">Формат их входа устно проговорён, но просят справку. Я составляю и сегодня дошлю.</td>
+      <td class="ball-cell" contenteditable="true" data-col="ball"><span class="ball ball-us">Нас</span></td>
+      <td class="next" contenteditable="true" data-col="next">Отправить справку: договор совместной деятельности и доверительного управления + процесс входа в состав участников через санацию.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 contenteditable="true" data-section="4">4. SCC / Мамед</h2>
+<table data-section-id="4">
+  <thead>
+    <tr><th>#</th><th>Задача</th><th>Статус</th><th>Мяч на стороне</th><th>Следующее действие</th></tr>
+  </thead>
+  <tbody>
+    <tr data-row="4.1">
+      <td class="num" contenteditable="true" data-col="id">4.1</td>
+      <td class="task" contenteditable="true" data-col="task">Оплата от Мамеда</td>
+      <td contenteditable="true" data-col="status">Не поступила.</td>
+      <td class="ball-cell" contenteditable="true" data-col="ball"><span class="ball ball-ext">Мамед</span></td>
+      <td class="next" contenteditable="true" data-col="next">Ждём деньги.</td>
+    </tr>
+    <tr data-row="4.2">
+      <td class="num" contenteditable="true" data-col="id">4.2</td>
+      <td class="task" contenteditable="true" data-col="task">Переоформление земли</td>
+      <td contenteditable="true" data-col="status">Договор составлен, не подписан.</td>
+      <td class="ball-cell" contenteditable="true" data-col="ball"><span class="ball ball-ext">Мамед</span></td>
+      <td class="next" contenteditable="true" data-col="next">Ждём подтверждение готовности подписать и переоформить.</td>
+    </tr>
+    <tr data-row="4.3">
+      <td class="num" contenteditable="true" data-col="id">4.3</td>
+      <td class="task" contenteditable="true" data-col="task">Восстановление лицензии (схема 2025) / 1-я строительная категория</td>
+      <td contenteditable="true" data-col="status">Схему 2025 не воспроизвести — юристы не подошли. Параллельно: участок в Жана Куат под 1-ю категорию не подходит (Айгуль перепроверила).</td>
+      <td class="ball-cell" contenteditable="true" data-col="ball"><span class="ball ball-us">Нас</span> <span class="ball ball-ext">Мамед</span></td>
+      <td class="next" contenteditable="true" data-col="next">Решить: (а) новый участок на баланс под 1-ю кат., (б) уведомление + согласие на 2-ю кат.</td>
+    </tr>
+    <tr data-row="4.4">
+      <td class="num" contenteditable="true" data-col="id">4.4</td>
+      <td class="task" contenteditable="true" data-col="task">Лянская — уступка по квартире</td>
+      <td contenteditable="true" data-col="status">
+        <span class="hot">ГОРИТ</span>
+        Договорённость о покупке у Мамеда есть. Долг 7 млн = 6,5 млн уступка + 500 тыс. задаток от матери. Мамеду пока не говорим — ждём первые деньги без удержаний. Терпение падает.
+      </td>
+      <td class="ball-cell" contenteditable="true" data-col="ball"><span class="ball ball-ext">Мамед</span></td>
+      <td class="next" contenteditable="true" data-col="next">После денег от Мамеда — подписать уступку, закрыть 500 тыс. задатка.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 contenteditable="true" data-section="5">5. Прочие проекты</h2>
+<table data-section-id="5">
+  <thead>
+    <tr><th>#</th><th>Задача</th><th>Статус</th><th>Мяч на стороне</th><th>Следующее действие</th></tr>
+  </thead>
+  <tbody>
+    <tr data-row="5.1">
+      <td class="num" contenteditable="true" data-col="id">5.1</td>
+      <td class="task" contenteditable="true" data-col="task">Открытие представительства JInchi в Казахстане</td>
+      <td contenteditable="true" data-col="status">Перепроверяем последние документы, советуемся — с каким составом всё-таки идти. Легализация каждого документа — от 1,5 до 2,5 тыс. юаней. У нас минимум 6 документов, обязательных около 2 (для перестраховки можно все, но лучше минимум, чтобы не разгонять расходы).</td>
+      <td class="ball-cell" contenteditable="true" data-col="ball"><span class="ball ball-us">Нас</span></td>
+      <td class="next" contenteditable="true" data-col="next">Финализировать перечень на этой неделе → Дия делает легализацию → запускаем процесс открытия представительства в РК.</td>
+    </tr>
+    <tr data-row="5.2">
+      <td class="num" contenteditable="true" data-col="id">5.2</td>
+      <td class="task" contenteditable="true" data-col="task">Взыскание долгов с Verde Generation</td>
+      <td contenteditable="true" data-col="status">Даврон отзванивался на прошлой неделе — сообщил, что склонен отказать Андрею и принимает в работу процесс по взысканию долгов с Verde Generation. Документы у него есть.</td>
+      <td class="ball-cell" contenteditable="true" data-col="ball"><span class="ball ball-us">Нас</span></td>
+      <td class="next" contenteditable="true" data-col="next">Я запускаю процесс взыскания.</td>
+    </tr>
+    <tr data-row="5.3">
+      <td class="num" contenteditable="true" data-col="id">5.3</td>
+      <td class="task" contenteditable="true" data-col="task">Выкуп доли ABI у Елнура Шарипбаева</td>
+      <td contenteditable="true" data-col="status">Отправлен повторный email — проблема не решается, ожидаем.</td>
+      <td class="ball-cell" contenteditable="true" data-col="ball"><span class="ball ball-ext">AFSA</span></td>
+      <td class="next" contenteditable="true" data-col="next">Регистрация сделки вручную через офис AFSA: оплата пошлины и перерегистрация.</td>
+    </tr>
+  </tbody>
+</table>
+
+<script>
+// ===== Pin lock =====
+(function() {
+  const PIN = '1303';
+  const overlay = document.getElementById('pin-overlay');
+  const input = document.getElementById('pin-input');
+  const error = document.getElementById('pin-error');
+
+  if (sessionStorage.getItem('sd_unlocked') === '1') {
+    overlay.style.display = 'none';
+    return;
+  }
+
+  document.body.style.overflow = 'hidden';
+  setTimeout(() => input.focus(), 50);
+
+  input.addEventListener('input', () => {
+    if (input.value.length === 4) {
+      if (input.value === PIN) {
+        sessionStorage.setItem('sd_unlocked', '1');
+        overlay.style.display = 'none';
+        document.body.style.overflow = '';
+      } else {
+        error.textContent = 'Неверный код';
+        input.value = '';
+        input.classList.add('shake');
+        setTimeout(() => input.classList.remove('shake'), 400);
+      }
+    } else {
+      error.textContent = '';
+    }
+  });
+})();
+
+// ===== Snapshot =====
+function buildSnapshot() {
+  const snap = {
+    exported_at: new Date().toISOString(),
+    title: document.querySelector('[data-field="title"]').innerText.trim(),
+    date: document.querySelector('[data-field="date"]').innerText.trim(),
+    sections: []
+  };
+
+  const sections = document.querySelectorAll('h2[data-section]');
+  sections.forEach(h2 => {
+    const section = { id: h2.dataset.section, title: h2.innerText.trim(), subsections: [], rows: [] };
+    let node = h2.nextElementSibling;
+    let currentSub = null;
+    while (node && node.tagName !== 'H2') {
+      if (node.tagName === 'H3') {
+        currentSub = { id: node.dataset.subsection || null, title: node.innerText.trim(), rows: [] };
+        section.subsections.push(currentSub);
+      } else if (node.tagName === 'TABLE') {
+        node.querySelectorAll('tbody tr[data-row]').forEach(tr => {
+          const row = {
+            id:     (tr.querySelector('[data-col="id"]')?.innerText     || tr.dataset.row || '').trim(),
+            task:   (tr.querySelector('[data-col="task"]')?.innerText   || '').trim(),
+            status: (tr.querySelector('[data-col="status"]')?.innerText || '').replace(/\s+/g, ' ').trim(),
+            ball:   (tr.querySelector('[data-col="ball"]')?.innerText   || '').replace(/\s+/g, ' ').trim(),
+            next:   (tr.querySelector('[data-col="next"]')?.innerText   || '').replace(/\s+/g, ' ').trim()
+          };
+          if (currentSub) currentSub.rows.push(row);
+          else section.rows.push(row);
+        });
+      }
+      node = node.nextElementSibling;
+    }
+    snap.sections.push(section);
+  });
+  return snap;
+}
+
+function showToast(text, ok = true) {
+  const t = document.getElementById('toast');
+  t.textContent = text;
+  t.style.background = ok ? '#16a34a' : '#c0392b';
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 1800);
+}
+
+function exportJSON() {
+  const json = JSON.stringify(buildSnapshot(), null, 2);
+  const blob = new Blob([json], { type: 'application/json;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const stamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+  a.href = url;
+  a.download = `status_snapshot_${stamp}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('JSON скачан');
+}
+
+async function copyJSON() {
+  const json = JSON.stringify(buildSnapshot(), null, 2);
+  try {
+    await navigator.clipboard.writeText(json);
+    showToast('JSON скопирован');
+  } catch (e) {
+    showToast('Не удалось скопировать', false);
+  }
+}
+</script>
+
+</body>
+</html>
