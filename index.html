@@ -598,10 +598,10 @@ onSnapshot(CELLS, (snap) => {
     cellMeta[key] = { author: data.author, ts: data.ts || 0 };
     const el = elByKey(key);
     if (!el) return;
-    if (document.activeElement !== el) {
-      const v = data.v || '';
-      if (el.innerHTML !== v) {
-        el.innerHTML = v;
+    // data.v может отсутствовать (маркер-запись только с автором) — тогда контент не трогаем.
+    if (data.v !== undefined && document.activeElement !== el) {
+      if (el.innerHTML !== data.v) {
+        el.innerHTML = data.v;
         if (!firstSnap) flashCell(el);
       }
     }
