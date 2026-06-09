@@ -1,0 +1,38 @@
+rules_version = '2';
+
+// ВАРИАНТ B — правила доступа к Firestore для дашборда шефа.
+//
+// Здесь ДВА набора. Включён один — раскомментируй нужный.
+//
+// =====================================================================
+// НАБОР 1 — ВРЕМЕННЫЙ, для проверки функциональности (НЕ оставлять надолго).
+// Открыт на чтение/запись всем. Использовать только на время теста сегодня.
+// =====================================================================
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if true;
+    }
+  }
+}
+
+// =====================================================================
+// НАБОР 2 — БОЕВОЙ, закрывает доступ.
+// Требует включённой Anonymous Authentication (Console → Authentication →
+// Sign-in method → Anonymous → Enable) И добавленного в index.html
+// анонимного входа (signInAnonymously). Включаем вместе на следующем шаге.
+// Чтобы активировать — закомментируй НАБОР 1 выше и раскомментируй блок ниже.
+// =====================================================================
+// service cloud.firestore {
+//   match /databases/{database}/documents {
+//     match /cells/{key} {
+//       allow read, write: if request.auth != null;
+//     }
+//     match /meta/{doc} {
+//       allow read, write: if request.auth != null;
+//     }
+//     match /{document=**} {
+//       allow read, write: if false;
+//     }
+//   }
+// }

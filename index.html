@@ -157,7 +157,8 @@
     gap: 8px;
     z-index: 1000;
   }
-  body.mode-ro .toolbar { display: none; }
+  /* тулбар виден обеим сторонам; экспорт — только в RW (мастер) */
+  body.mode-ro #btn-export, body.mode-ro #btn-copy { display: none; }
   .toolbar button {
     background: #111;
     color: #fff;
@@ -247,8 +248,17 @@
     40%, 80% { transform: translateX(6px); }
   }
 
+  /* Variant B — авторская подсветка правок */
+  td.v-shef  { background: #fdecec !important; box-shadow: inset 3px 0 0 #c0392b; }
+  td.v-askar { background: #e9f7ef !important; box-shadow: inset 3px 0 0 #16a34a; }
+  h1.v-shef, h2.v-shef, h3.v-shef    { border-left: 4px solid #c0392b; padding-left: 8px; }
+  h1.v-askar, h2.v-askar, h3.v-askar { border-left: 4px solid #16a34a; padding-left: 8px; }
+  .date.v-shef  { border-left: 4px solid #c0392b; padding-left: 8px; }
+  .date.v-askar { border-left: 4px solid #16a34a; padding-left: 8px; }
+
   @media print {
     .toolbar, .sync-indicator { display: none; }
+    td.v-shef, td.v-askar { background: transparent !important; box-shadow: none; }
     [contenteditable="true"]:hover, [contenteditable="true"]:focus {
       background: transparent; box-shadow: none;
     }
@@ -271,191 +281,192 @@
 </div>
 
 <div class="toolbar">
-  <button id="btn-export">Экспорт изменений (JSON)</button>
+  <button id="btn-seen">Отметить просмотренным</button>
+  <button id="btn-export" class="secondary">Экспорт изменений (JSON)</button>
   <button id="btn-copy" class="secondary">Копировать JSON</button>
 </div>
 
 <div id="toast" class="toast"></div>
 
-<h1 data-field="title">Статус-отчёт по текущим задачам</h1>
-<div class="date" data-field="date">Дата: 2026-06-10</div>
+<h1 contenteditable="true" data-field="title">Статус-отчёт по текущим задачам</h1>
+<div class="date" contenteditable="true" data-field="date">Дата: 2026-06-10</div>
 
 <div class="greeting">
   <strong>Привет, Шеф.</strong> Эта статус-таблица сделана для тебя. Оставляй комменты в последнем столбике — они сохраняются автоматически, я увижу их у себя.
 </div>
 
-<h2 data-section="1">1. EW</h2>
+<h2 contenteditable="true" data-section="1">1. EW</h2>
 <table data-section-id="1">
   <thead>
     <tr><th>#</th><th>Задача</th><th>Статус</th><th>Мяч на стороне</th><th>Следующее действие</th><th>Комментарий шефа</th></tr>
   </thead>
   <tbody>
     <tr data-row="1.1">
-      <td class="num" data-col="id">1.1</td>
-      <td class="task" data-col="task">Дополнительное соглашение к Договору займа</td>
-      <td data-col="status">— ТСН согласился с предложенными условиями возврата в рассрочку без процентов<br>— Редакция договора согласована с погашением 1 млн и 58 тысяч долларов в виде процентов<br>— Договор подписан всеми сторонами</td>
-      <td class="ball-cell" data-col="ball"><span class="ball ball-us">Нас</span></td>
-      <td class="next" data-col="next">—</td>
+      <td class="num" contenteditable="true" data-col="id">1.1</td>
+      <td class="task" contenteditable="true" data-col="task">Дополнительное соглашение к Договору займа</td>
+      <td contenteditable="true" data-col="status">— ТСН согласился с предложенными условиями возврата в рассрочку без процентов<br>— Редакция договора согласована с погашением 1 млн и 58 тысяч долларов в виде процентов<br>— Договор подписан всеми сторонами</td>
+      <td class="ball-cell" contenteditable="true" data-col="ball"><span class="ball ball-us">Нас</span></td>
+      <td class="next" contenteditable="true" data-col="next">—</td>
       <td class="comment-cell" contenteditable="true" data-col="comment" data-placeholder="Оставьте коммент..."></td>
     </tr>
   </tbody>
 </table>
 
-<h2 data-section="2">2. Земельный банк</h2>
+<h2 contenteditable="true" data-section="2">2. Земельный банк</h2>
 
-<h3 data-subsection="2.1">2.1. Участок 18 га</h3>
+<h3 contenteditable="true" data-subsection="2.1">2.1. Участок 18 га</h3>
 <table data-section-id="2.1">
   <thead>
     <tr><th>#</th><th>Задача</th><th>Статус</th><th>Мяч на стороне</th><th>Следующее действие</th><th>Комментарий шефа</th></tr>
   </thead>
   <tbody>
     <tr data-row="2.1.1">
-      <td class="num" data-col="id">2.1.1</td>
-      <td class="task" data-col="task">Исковая работа с захватчиками земель</td>
-      <td data-col="status">— с Арманом проведён звонок<br>— инструкции по землям предоставлены в полной мере<br>— Арманом изучены документы и определён план действий</td>
-      <td class="ball-cell" data-col="ball"><span class="ball ball-ext">Армана</span></td>
-      <td class="next" data-col="next">— Арман должен предоставить шаблон доверенности на подписание<br>— Арман должен предоставить тип оценки, который необходим для представления претензий</td>
+      <td class="num" contenteditable="true" data-col="id">2.1.1</td>
+      <td class="task" contenteditable="true" data-col="task">Исковая работа с захватчиками земель</td>
+      <td contenteditable="true" data-col="status">— с Арманом проведён звонок<br>— инструкции по землям предоставлены в полной мере<br>— Арманом изучены документы и определён план действий</td>
+      <td class="ball-cell" contenteditable="true" data-col="ball"><span class="ball ball-ext">Армана</span></td>
+      <td class="next" contenteditable="true" data-col="next">— Арман должен предоставить шаблон доверенности на подписание<br>— Арман должен предоставить тип оценки, который необходим для представления претензий</td>
       <td class="comment-cell" contenteditable="true" data-col="comment" data-placeholder="Оставьте коммент..."></td>
     </tr>
   </tbody>
 </table>
 
-<h3 data-subsection="2.2">2.2. Участок 10 га (Табаган)</h3>
+<h3 contenteditable="true" data-subsection="2.2">2.2. Участок 10 га (Табаган)</h3>
 <table data-section-id="2.2">
   <thead>
     <tr><th>#</th><th>Задача</th><th>Статус</th><th>Мяч на стороне</th><th>Следующее действие</th><th>Комментарий шефа</th></tr>
   </thead>
   <tbody>
     <tr data-row="2.2.1">
-      <td class="num" data-col="id">2.2.1</td>
-      <td class="task" data-col="task">Риелторы</td>
-      <td data-col="status">Выезды проведены, устные договорённости есть. ОС от покупателей нет.</td>
-      <td class="ball-cell" data-col="ball"><span class="ball ball-ext">Риелторы</span></td>
-      <td class="next" data-col="next">Ожидаем.</td>
+      <td class="num" contenteditable="true" data-col="id">2.2.1</td>
+      <td class="task" contenteditable="true" data-col="task">Риелторы</td>
+      <td contenteditable="true" data-col="status">Выезды проведены, устные договорённости есть. ОС от покупателей нет.</td>
+      <td class="ball-cell" contenteditable="true" data-col="ball"><span class="ball ball-ext">Риелторы</span></td>
+      <td class="next" contenteditable="true" data-col="next">Ожидаем.</td>
       <td class="comment-cell" contenteditable="true" data-col="comment" data-placeholder="Оставьте коммент..."></td>
     </tr>
     <tr data-row="2.2.2">
-      <td class="num" data-col="id">2.2.2</td>
-      <td class="task" data-col="task">Ролик</td>
-      <td data-col="status">— съёмка проведена, ролик получен, качество неудовлетворительное<br>— предлагается отправить ролики на монтаж и дорисовку ИИ-дизайнеру (creativeaikz)</td>
-      <td class="ball-cell" data-col="ball"><span class="ball ball-us">Нас</span></td>
-      <td class="next" data-col="next"></td>
+      <td class="num" contenteditable="true" data-col="id">2.2.2</td>
+      <td class="task" contenteditable="true" data-col="task">Ролик</td>
+      <td contenteditable="true" data-col="status">— съёмка проведена, ролик получен, качество неудовлетворительное<br>— предлагается отправить ролики на монтаж и дорисовку ИИ-дизайнеру (creativeaikz)</td>
+      <td class="ball-cell" contenteditable="true" data-col="ball"><span class="ball ball-us">Нас</span></td>
+      <td class="next" contenteditable="true" data-col="next"></td>
       <td class="comment-cell" contenteditable="true" data-col="comment" data-placeholder="Оставьте коммент..."></td>
     </tr>
   </tbody>
 </table>
 
-<h3 data-subsection="2.3">2.3. Участки под ЛЭПами</h3>
+<h3 contenteditable="true" data-subsection="2.3">2.3. Участки под ЛЭПами</h3>
 <table data-section-id="2.3">
   <thead>
     <tr><th>#</th><th>Задача</th><th>Статус</th><th>Мяч на стороне</th><th>Следующее действие</th><th>Комментарий шефа</th></tr>
   </thead>
   <tbody>
     <tr data-row="2.3.1">
-      <td class="num" data-col="id">2.3.1</td>
-      <td class="task" data-col="task">Встреча с Айвазом</td>
-      <td data-col="status">Ожидаем встречу.</td>
-      <td class="ball-cell" data-col="ball"><span class="ball ball-ext">Мамед</span></td>
-      <td class="next" data-col="next">Назначить и провести.</td>
+      <td class="num" contenteditable="true" data-col="id">2.3.1</td>
+      <td class="task" contenteditable="true" data-col="task">Встреча с Айвазом</td>
+      <td contenteditable="true" data-col="status">Ожидаем встречу.</td>
+      <td class="ball-cell" contenteditable="true" data-col="ball"><span class="ball ball-ext">Мамед</span></td>
+      <td class="next" contenteditable="true" data-col="next">Назначить и провести.</td>
       <td class="comment-cell" contenteditable="true" data-col="comment" data-placeholder="Оставьте коммент..."></td>
     </tr>
     <tr data-row="2.3.2">
-      <td class="num" data-col="id">2.3.2</td>
-      <td class="task" data-col="task">Предложение для Керемета</td>
-      <td data-col="status">В процессе, будет финализировано не позднее 10.06.</td>
-      <td class="ball-cell" data-col="ball"><span class="ball ball-us">Аскар</span></td>
-      <td class="next" data-col="next">Завершить и направить Керемету.</td>
+      <td class="num" contenteditable="true" data-col="id">2.3.2</td>
+      <td class="task" contenteditable="true" data-col="task">Предложение для Керемета</td>
+      <td contenteditable="true" data-col="status">В процессе, будет финализировано не позднее 10.06.</td>
+      <td class="ball-cell" contenteditable="true" data-col="ball"><span class="ball ball-us">Аскар</span></td>
+      <td class="next" contenteditable="true" data-col="next">Завершить и направить Керемету.</td>
       <td class="comment-cell" contenteditable="true" data-col="comment" data-placeholder="Оставьте коммент..."></td>
     </tr>
   </tbody>
 </table>
 
-<h2 data-section="3">3. AGROSTAN</h2>
+<h2 contenteditable="true" data-section="3">3. AGROSTAN</h2>
 <table data-section-id="3">
   <thead>
     <tr><th>#</th><th>Задача</th><th>Статус</th><th>Мяч на стороне</th><th>Следующее действие</th><th>Комментарий шефа</th></tr>
   </thead>
   <tbody>
     <tr data-row="3.1">
-      <td class="num" data-col="id">3.1</td>
-      <td class="task" data-col="task">Информирование Женисбека</td>
-      <td data-col="status">— Женисбеку предоставлены все материалы<br>— его юристами были направлены уточняющие вопросы<br>— после ответа на вопросы Женисбек перестал выходить на связь</td>
-      <td class="ball-cell" data-col="ball"></td>
-      <td class="next" data-col="next"></td>
+      <td class="num" contenteditable="true" data-col="id">3.1</td>
+      <td class="task" contenteditable="true" data-col="task">Информирование Женисбека</td>
+      <td contenteditable="true" data-col="status">— Женисбеку предоставлены все материалы<br>— его юристами были направлены уточняющие вопросы<br>— после ответа на вопросы Женисбек перестал выходить на связь</td>
+      <td class="ball-cell" contenteditable="true" data-col="ball"></td>
+      <td class="next" contenteditable="true" data-col="next"></td>
       <td class="comment-cell" contenteditable="true" data-col="comment" data-placeholder="Оставьте коммент..."></td>
     </tr>
   </tbody>
 </table>
 
-<h2 data-section="4">4. SCC / Мамед</h2>
+<h2 contenteditable="true" data-section="4">4. SCC / Мамед</h2>
 <table data-section-id="4">
   <thead>
     <tr><th>#</th><th>Задача</th><th>Статус</th><th>Мяч на стороне</th><th>Следующее действие</th><th>Комментарий шефа</th></tr>
   </thead>
   <tbody>
     <tr data-row="4.1">
-      <td class="num" data-col="id">4.1</td>
-      <td class="task" data-col="task">Оплата от Мамеда</td>
-      <td data-col="status">Не поступила.</td>
-      <td class="ball-cell" data-col="ball"><span class="ball ball-ext">Мамед</span></td>
-      <td class="next" data-col="next">Ждём деньги.</td>
+      <td class="num" contenteditable="true" data-col="id">4.1</td>
+      <td class="task" contenteditable="true" data-col="task">Оплата от Мамеда</td>
+      <td contenteditable="true" data-col="status">Не поступила.</td>
+      <td class="ball-cell" contenteditable="true" data-col="ball"><span class="ball ball-ext">Мамед</span></td>
+      <td class="next" contenteditable="true" data-col="next">Ждём деньги.</td>
       <td class="comment-cell" contenteditable="true" data-col="comment" data-placeholder="Оставьте коммент..."></td>
     </tr>
     <tr data-row="4.2">
-      <td class="num" data-col="id">4.2</td>
-      <td class="task" data-col="task">Переоформление земли</td>
-      <td data-col="status">Договор составлен, не подписан.</td>
-      <td class="ball-cell" data-col="ball"><span class="ball ball-ext">Мамед</span></td>
-      <td class="next" data-col="next">Ждём подтверждение готовности подписать и переоформить.</td>
+      <td class="num" contenteditable="true" data-col="id">4.2</td>
+      <td class="task" contenteditable="true" data-col="task">Переоформление земли</td>
+      <td contenteditable="true" data-col="status">Договор составлен, не подписан.</td>
+      <td class="ball-cell" contenteditable="true" data-col="ball"><span class="ball ball-ext">Мамед</span></td>
+      <td class="next" contenteditable="true" data-col="next">Ждём подтверждение готовности подписать и переоформить.</td>
       <td class="comment-cell" contenteditable="true" data-col="comment" data-placeholder="Оставьте коммент..."></td>
     </tr>
     <tr data-row="4.3">
-      <td class="num" data-col="id">4.3</td>
-      <td class="task" data-col="task">Восстановление лицензии (схема 2025) / 1-я строительная категория</td>
-      <td data-col="status">— вариант сохранения лицензии подобран, стоимость 5 млн тенге</td>
-      <td class="ball-cell" data-col="ball"><span class="ball ball-ext">Мамед</span></td>
-      <td class="next" data-col="next">Решить по использованию предложенных услуг.</td>
+      <td class="num" contenteditable="true" data-col="id">4.3</td>
+      <td class="task" contenteditable="true" data-col="task">Восстановление лицензии (схема 2025) / 1-я строительная категория</td>
+      <td contenteditable="true" data-col="status">— вариант сохранения лицензии подобран, стоимость 5 млн тенге</td>
+      <td class="ball-cell" contenteditable="true" data-col="ball"><span class="ball ball-ext">Мамед</span></td>
+      <td class="next" contenteditable="true" data-col="next">Решить по использованию предложенных услуг.</td>
       <td class="comment-cell" contenteditable="true" data-col="comment" data-placeholder="Оставьте коммент..."></td>
     </tr>
     <tr data-row="4.4">
-      <td class="num" data-col="id">4.4</td>
-      <td class="task" data-col="task">Лянская — уступка по квартире</td>
-      <td data-col="status">— Мамед дал предварительное согласие<br>— договор составляется<br>— претензия от Лянской получена</td>
-      <td class="ball-cell" data-col="ball"><span class="ball ball-us">Аскар</span></td>
-      <td class="next" data-col="next">Подписание нами и Мамедом уступки и отправка Лянской в ответ на претензию с предложением немедленного подписания.</td>
+      <td class="num" contenteditable="true" data-col="id">4.4</td>
+      <td class="task" contenteditable="true" data-col="task">Лянская — уступка по квартире</td>
+      <td contenteditable="true" data-col="status">— Мамед дал предварительное согласие<br>— договор составляется<br>— претензия от Лянской получена</td>
+      <td class="ball-cell" contenteditable="true" data-col="ball"><span class="ball ball-us">Аскар</span></td>
+      <td class="next" contenteditable="true" data-col="next">Подписание нами и Мамедом уступки и отправка Лянской в ответ на претензию с предложением немедленного подписания.</td>
       <td class="comment-cell" contenteditable="true" data-col="comment" data-placeholder="Оставьте коммент..."></td>
     </tr>
   </tbody>
 </table>
 
-<h2 data-section="5">5. Прочие проекты</h2>
+<h2 contenteditable="true" data-section="5">5. Прочие проекты</h2>
 <table data-section-id="5">
   <thead>
     <tr><th>#</th><th>Задача</th><th>Статус</th><th>Мяч на стороне</th><th>Следующее действие</th><th>Комментарий шефа</th></tr>
   </thead>
   <tbody>
     <tr data-row="5.1">
-      <td class="num" data-col="id">5.1</td>
-      <td class="task" data-col="task">Открытие представительства JInchi в Казахстане</td>
-      <td data-col="status">После изучения документов сделали вывод, что как такового исчерпывающего списка, который точно будет принят, — нет, так как общей практики нет. В разных случаях (разных компаний и состава документов) может трактоваться на усмотрение НАО. Пойдём с легализацией одного документа (выписка из торгового реестра с регистрационными данными).<br>— открыт вопрос по тому, в каком городе Дия будет делать легализацию, так как цена варьируется в несколько раз.</td>
-      <td class="ball-cell" data-col="ball"><span class="ball ball-us">Аскар</span></td>
-      <td class="next" data-col="next">Дать отмашку Дие по легализации.</td>
+      <td class="num" contenteditable="true" data-col="id">5.1</td>
+      <td class="task" contenteditable="true" data-col="task">Открытие представительства JInchi в Казахстане</td>
+      <td contenteditable="true" data-col="status">После изучения документов сделали вывод, что как такового исчерпывающего списка, который точно будет принят, — нет, так как общей практики нет. В разных случаях (разных компаний и состава документов) может трактоваться на усмотрение НАО. Пойдём с легализацией одного документа (выписка из торгового реестра с регистрационными данными).<br>— открыт вопрос по тому, в каком городе Дия будет делать легализацию, так как цена варьируется в несколько раз.</td>
+      <td class="ball-cell" contenteditable="true" data-col="ball"><span class="ball ball-us">Аскар</span></td>
+      <td class="next" contenteditable="true" data-col="next">Дать отмашку Дие по легализации.</td>
       <td class="comment-cell" contenteditable="true" data-col="comment" data-placeholder="Оставьте коммент..."></td>
     </tr>
     <tr data-row="5.2">
-      <td class="num" data-col="id">5.2</td>
-      <td class="task" data-col="task">Взыскание долгов с Verde Generation</td>
-      <td data-col="status">Даврон отказался от оказания услуг Андрею во избежание конфликта интересов.</td>
-      <td class="ball-cell" data-col="ball"><span class="ball ball-ext">Даврон</span> <span class="ball ball-us">Аскар</span></td>
-      <td class="next" data-col="next">Запустить процесс взыскания.</td>
+      <td class="num" contenteditable="true" data-col="id">5.2</td>
+      <td class="task" contenteditable="true" data-col="task">Взыскание долгов с Verde Generation</td>
+      <td contenteditable="true" data-col="status">Даврон отказался от оказания услуг Андрею во избежание конфликта интересов.</td>
+      <td class="ball-cell" contenteditable="true" data-col="ball"><span class="ball ball-ext">Даврон</span> <span class="ball ball-us">Аскар</span></td>
+      <td class="next" contenteditable="true" data-col="next">Запустить процесс взыскания.</td>
       <td class="comment-cell" contenteditable="true" data-col="comment" data-placeholder="Оставьте коммент..."></td>
     </tr>
     <tr data-row="5.3">
-      <td class="num" data-col="id">5.3</td>
-      <td class="task" data-col="task">Выкуп доли ABI у Елнура Шарипбаева</td>
-      <td data-col="status">Отправлен повторный email — проблема не решается, ожидаем.</td>
-      <td class="ball-cell" data-col="ball"><span class="ball ball-ext">AFSA</span></td>
-      <td class="next" data-col="next">Регистрация сделки вручную через офис AFSA: оплата пошлины и перерегистрация.</td>
+      <td class="num" contenteditable="true" data-col="id">5.3</td>
+      <td class="task" contenteditable="true" data-col="task">Выкуп доли ABI у Елнура Шарипбаева</td>
+      <td contenteditable="true" data-col="status">Отправлен повторный email — проблема не решается, ожидаем.</td>
+      <td class="ball-cell" contenteditable="true" data-col="ball"><span class="ball ball-ext">AFSA</span></td>
+      <td class="next" contenteditable="true" data-col="next">Регистрация сделки вручную через офис AFSA: оплата пошлины и перерегистрация.</td>
       <td class="comment-cell" contenteditable="true" data-col="comment" data-placeholder="Оставьте коммент..."></td>
     </tr>
   </tbody>
@@ -479,14 +490,12 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// ===== Mode detection =====
+// ===== Mode / role detection =====
+// Публичная версия (github.io) = Шеф. Локальный мастер = Аскар.
 const IS_PUBLIC = location.hostname.includes('github.io');
-if (IS_PUBLIC) {
-  document.body.classList.add('mode-ro');
-  document.querySelectorAll('[contenteditable="true"]').forEach(el => {
-    if (el.dataset.col !== 'comment') el.removeAttribute('contenteditable');
-  });
-}
+const ROLE = IS_PUBLIC ? 'shef' : 'askar';
+if (IS_PUBLIC) document.body.classList.add('mode-ro');
+// В Варианте B обе стороны редактируют все ячейки — contenteditable не снимаем.
 
 // ===== Sync indicator =====
 const syncEl = document.getElementById('sync-indicator');
@@ -528,64 +537,114 @@ function setSync(state, text) {
   });
 })();
 
-// ===== Firestore: real-time comments =====
+// ===== Firestore: синхронизация всех ячеек (Вариант B) =====
+// Каждая редактируемая ячейка/заголовок — документ в коллекции `cells`.
+// id документа = стабильный ключ; поля: { v: innerHTML, author, ts }.
+// Цвет правки виден ПРОТИВОПОЛОЖНОЙ стороне, пока она не нажала «Просмотрено».
+// База «просмотрено» — документ meta/_seen { shef, askar } (millis).
+const CELLS = collection(db, 'cells');
+const SEEN_DOC = doc(db, 'meta', '_seen');
+
+function keyOf(el) {
+  if (el.dataset.field) return 'meta|' + el.dataset.field;
+  if (el.tagName === 'H2' && el.dataset.section !== undefined) return 'sec|' + el.dataset.section;
+  if (el.dataset.subsection !== undefined) return 'sub|' + el.dataset.subsection;
+  const tr = el.closest('tr[data-row]');
+  if (tr && el.dataset.col) return 'row|' + tr.dataset.row + '|' + el.dataset.col;
+  return null;
+}
+function elByKey(key) {
+  const p = key.split('|');
+  if (p[0] === 'meta') return document.querySelector(`[data-field="${p[1]}"]`);
+  if (p[0] === 'sec')  return document.querySelector(`h2[data-section="${p[1]}"]`);
+  if (p[0] === 'sub')  return document.querySelector(`[data-subsection="${p[1]}"]`);
+  if (p[0] === 'row')  return document.querySelector(`tr[data-row="${p[1]}"] [data-col="${p[2]}"]`);
+  return null;
+}
+
+let seenState = { shef: 0, askar: 0 };
+let cellMeta = {}; // key -> { author, ts }
+
 function flashCell(el) {
   el.classList.add('flash');
   setTimeout(() => el.classList.remove('flash'), 1500);
 }
+function paint(key) {
+  const el = elByKey(key);
+  if (!el) return;
+  el.classList.remove('v-shef', 'v-askar');
+  const m = cellMeta[key];
+  if (!m || !m.author) return;
+  if (m.author !== ROLE && (m.ts || 0) > (seenState[ROLE] || 0)) {
+    el.classList.add(m.author === 'shef' ? 'v-shef' : 'v-askar');
+  }
+}
+function repaintAll() { Object.keys(cellMeta).forEach(paint); }
 
+// База «просмотрено»
+onSnapshot(SEEN_DOC, (snap) => {
+  const d = snap.data() || {};
+  seenState = { shef: d.shef || 0, askar: d.askar || 0 };
+  repaintAll();
+}, (err) => console.error('Seen subscribe error:', err));
+
+// Ячейки
 let firstSnap = true;
 setSync('saving', 'Подключение…');
-onSnapshot(
-  collection(db, 'comments'),
-  (snap) => {
-    snap.docChanges().forEach(change => {
-      const rowId = change.doc.id;
-      const data = change.doc.data();
-      const cell = document.querySelector(`tr[data-row="${rowId}"] [data-col="comment"]`);
-      if (!cell) return;
-      if (document.activeElement === cell) return;
-      const newText = (data.text || '').trim();
-      const cur = (cell.innerText || '').trim();
-      if (cur === newText) return;
-      if (newText) cell.innerText = newText;
-      else cell.textContent = '';
-      if (!firstSnap) flashCell(cell);
-    });
-    firstSnap = false;
-    setSync('ok', 'Подключено');
-  },
-  (err) => {
-    console.error('Firestore subscribe error:', err);
-    setSync('error', 'Ошибка подключения');
-  }
-);
+onSnapshot(CELLS, (snap) => {
+  snap.docChanges().forEach(change => {
+    const key = change.doc.id;
+    const data = change.doc.data();
+    cellMeta[key] = { author: data.author, ts: data.ts || 0 };
+    const el = elByKey(key);
+    if (!el) return;
+    if (document.activeElement !== el) {
+      const v = data.v || '';
+      if (el.innerHTML !== v) {
+        el.innerHTML = v;
+        if (!firstSnap) flashCell(el);
+      }
+    }
+    paint(key);
+  });
+  firstSnap = false;
+  setSync('ok', 'Подключено');
+}, (err) => {
+  console.error('Firestore subscribe error:', err);
+  setSync('error', 'Ошибка подключения');
+});
 
-// ===== Save on input (debounced) =====
+// ===== Сохранение правок (debounced) =====
 const saveTimers = {};
-const AUTHOR = IS_PUBLIC ? 'shef' : 'askar';
 document.addEventListener('input', (e) => {
-  const t = e.target;
-  if (!t.dataset || t.dataset.col !== 'comment') return;
-  const tr = t.closest('tr[data-row]');
-  if (!tr) return;
-  const rowId = tr.dataset.row;
-  const text = (t.innerText || '').trim();
-  clearTimeout(saveTimers[rowId]);
+  const t = e.target.closest('[data-field], h2[data-section], [data-subsection], [data-col]');
+  if (!t) return;
+  const key = keyOf(t);
+  if (!key) return;
+  const v = t.innerHTML;
+  const ts = Date.now();
+  cellMeta[key] = { author: ROLE, ts };
+  clearTimeout(saveTimers[key]);
   setSync('saving', 'Сохранение…');
-  saveTimers[rowId] = setTimeout(async () => {
+  saveTimers[key] = setTimeout(async () => {
     try {
-      await setDoc(doc(db, 'comments', rowId), {
-        text: text,
-        author: AUTHOR,
-        updated_at: serverTimestamp()
-      }, { merge: true });
+      await setDoc(doc(db, 'cells', key), { v, author: ROLE, ts }, { merge: true });
       setSync('ok', 'Сохранено');
     } catch (err) {
       console.error('Save error:', err);
       setSync('error', 'Ошибка сохранения');
     }
   }, 500);
+});
+
+// ===== Кнопка «Отметить просмотренным» =====
+document.getElementById('btn-seen')?.addEventListener('click', async () => {
+  const now = Date.now();
+  seenState[ROLE] = now;
+  repaintAll();
+  try {
+    await setDoc(SEEN_DOC, { [ROLE]: now }, { merge: true });
+  } catch (err) { console.error('Seen save error:', err); }
 });
 
 // ===== JSON snapshot (RW only) =====
